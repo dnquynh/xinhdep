@@ -54,3 +54,9 @@ CREATE TABLE IF NOT EXISTS pending (
     payload     TEXT NOT NULL,             -- JSON bản nháp giao dịch + loại câu hỏi
     created_at  TEXT NOT NULL
 );
+
+-- Nhóm bạn đã chọn cho từng mô tả, để lần sau bot tự xếp (không dấu, chữ thường).
+CREATE TABLE IF NOT EXISTS category_hints (
+    keyword   TEXT PRIMARY KEY,
+    category  TEXT NOT NULL
+);

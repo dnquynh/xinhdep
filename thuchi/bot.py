@@ -348,6 +348,8 @@ class Bot:
                 if len(match) != 1:
                     return None
                 d["category"] = match[0]
+            if d.get("note"):
+                lg.learn_category(d["note"], d["category"])  # lần sau tự xếp
             return self._process(chat_id, d)
 
         if q == "person":

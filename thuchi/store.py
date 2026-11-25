@@ -420,6 +420,25 @@ class Ledger:
         owed = max(self.debt_between(payer, receiver), 0)
         return max(amount - owed, 0)
 
+    # ------------------------------------------------------------------ nhóm đã học
+
+    @staticmethod
+    def _hint_key(note: str) -> str:
+        s = unicodedata.normalize("NFD", note.lower())
+        s = "".join(c for c in s if unicodedata.category(c) != "Mn").replace("đ", "d")
+        s = re.sub(r"[^a-z0-9 ]", " ", s)
+        return re.sub(r"\s+", " ", s).strip()
+
+    def learn_category(self, note: str, category: str) -> None:
+        key = self._hint_key(note)
+        if key:
+            self._category_id(category, "chi")  # kiểm tra nhóm có thật
+            with self.db:
+                self.db.execute("INSERT OR REPLACE INTO category_hints (keyword, category) VALUES (?, ?)", (key, category))
+
+    def category_hints(self) -> dict[str, str]:
+        return {r["keyword"]: r["category"] for r in self.db.execute("SELECT keyword, category FROM category_hints")}
+
     # ------------------------------------------------------------------ câu hỏi đang chờ
 
     def get_pending(self, chat_id: str, max_age: timedelta = timedelta(hours=2)) -> dict | None:

@@ -4,7 +4,8 @@
     python3 -m thuchi.cli --db test.db
     python3 -m thuchi.cli --script cau.txt   # chạy lần lượt từng dòng trong file
 
-Cần ANTHROPIC_API_KEY trong biến môi trường hoặc file .env.
+Mặc định dùng bộ hiểu tin nhắn bằng quy tắc: miễn phí, không cần key.
+Muốn dùng Claude thì đặt THUCHI_PARSER=claude và ANTHROPIC_API_KEY trong .env.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from pathlib import Path
 
 from .ai_parser import AIUnavailable, ClaudeParser
 from .bot import Bot
+from .rule_parser import RuleParser
 from .store import Ledger
 
 CHAT_ID = "cli"
@@ -33,6 +35,18 @@ def load_dotenv(path: Path = Path(".env")) -> None:
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
+def make_bot(db_path: str) -> Bot | None:
+    """Tạo bot với bộ hiểu tin nhắn theo cấu hình (mặc định: quy tắc, miễn phí)."""
+    ledger = Ledger(db_path)
+    if os.environ.get("THUCHI_PARSER", "rule").lower() == "claude":
+        try:
+            return Bot(ledger, ClaudeParser())
+        except AIUnavailable as exc:
+            print(f"Lỗi: {exc}. Thêm ANTHROPIC_API_KEY vào .env hoặc bỏ THUCHI_PARSER=claude.", file=sys.stderr)
+            return None
+    return Bot(ledger, RuleParser(ledger))
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Chat thử bot thu chi")
     ap.add_argument("--db", default=os.environ.get("THUCHI_DB", "thuchi.db"))
@@ -40,13 +54,9 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     load_dotenv()
-    try:
-        parser = ClaudeParser()
-    except AIUnavailable as exc:
-        print(f"Lỗi: {exc}. Tạo file .env có dòng ANTHROPIC_API_KEY=... rồi chạy lại.", file=sys.stderr)
+    bot = make_bot(args.db)
+    if bot is None:
         return 1
-
-    bot = Bot(Ledger(args.db), parser)
 
     if args.script:
         for line in Path(args.script).read_text(encoding="utf-8").splitlines():
