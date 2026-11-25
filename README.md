@@ -28,7 +28,7 @@ python3 -m thuchi.cli --db demo.db --script scripts/cau_mau.txt   # chạy lại
 
 ## Bot hiểu gì
 
-- `tiền điện 450k`: chi cá nhân, AI tự xếp vào nhóm.
+- `tiền điện 450k`: chi cá nhân, bot tự xếp vào nhóm.
 - `ăn lẩu 600k, tôi trả, chia với Nam và Lan`: chi chung. Bot hỏi lại cách chia, trả lời `ok` là chia đều hoặc ghi `Nam 250k, Lan 250k, tôi 100k`.
 - `ăn lẩu 600k chia đều với Nam và Lan`: ghi luôn, không hỏi.
 - `cho Hùng mượn 2tr`, `vay chị Mai 1tr5`, `Hùng trả 500k`, `trả chị Mai 1tr`: vay và trả nợ.
