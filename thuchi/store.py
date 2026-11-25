@@ -6,6 +6,7 @@ các hàm ở đây, không tự viết SQL và không tự cộng trừ tiền.
 
 from __future__ import annotations
 
+import json
 import re
 import sqlite3
 import unicodedata
@@ -418,6 +419,28 @@ class Ledger:
         """Số tiền trả dư so với nợ hiện tại (0 nếu không dư). Bot dùng để hỏi lại."""
         owed = max(self.debt_between(payer, receiver), 0)
         return max(amount - owed, 0)
+
+    # ------------------------------------------------------------------ câu hỏi đang chờ
+
+    def get_pending(self, chat_id: str, max_age: timedelta = timedelta(hours=2)) -> dict | None:
+        row = self.db.execute("SELECT payload, created_at FROM pending WHERE chat_id = ?", (chat_id,)).fetchone()
+        if row is None:
+            return None
+        if datetime.now(timezone.utc) - datetime.fromisoformat(row["created_at"]) > max_age:
+            self.clear_pending(chat_id)
+            return None
+        return json.loads(row["payload"])
+
+    def set_pending(self, chat_id: str, payload: dict) -> None:
+        with self.db:
+            self.db.execute(
+                "INSERT OR REPLACE INTO pending (chat_id, payload, created_at) VALUES (?, ?, ?)",
+                (chat_id, json.dumps(payload, ensure_ascii=False), datetime.now(timezone.utc).isoformat()),
+            )
+
+    def clear_pending(self, chat_id: str) -> None:
+        with self.db:
+            self.db.execute("DELETE FROM pending WHERE chat_id = ?", (chat_id,))
 
     # ------------------------------------------------------------------ tổng kết
 

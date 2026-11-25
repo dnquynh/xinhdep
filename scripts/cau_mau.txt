@@ -1,0 +1,15 @@
+# 7 câu mẫu, chạy bằng: python3 -m thuchi.cli --db demo.db --script scripts/cau_mau.txt
+ăn lẩu 600k, tôi trả, chia với Nam và Lan
+thêm
+thêm
+ok
+Nam trả tiền taxi 120k cho tôi với Nam
+ok
+cho Hùng mượn 2tr
+thêm
+Hùng trả 500k
+vay chị Mai 1tr5
+thêm
+lương tháng 11 15tr
+tiền điện 450k
+tổng kết

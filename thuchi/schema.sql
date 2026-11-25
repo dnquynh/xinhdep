@@ -47,3 +47,10 @@ CREATE TABLE IF NOT EXISTS splits (
     amount          INTEGER NOT NULL CHECK (amount > 0),
     PRIMARY KEY (transaction_id, person_id)
 );
+
+-- Câu hỏi bot đang chờ người dùng trả lời (mỗi cuộc chat tối đa một câu).
+CREATE TABLE IF NOT EXISTS pending (
+    chat_id     TEXT PRIMARY KEY,
+    payload     TEXT NOT NULL,             -- JSON bản nháp giao dịch + loại câu hỏi
+    created_at  TEXT NOT NULL
+);
